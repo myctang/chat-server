@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: 'jdbc:mysql://localhost:3306/chat?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2'
+    username: 'chat'
+    password: 'Chat_pass1!'
+  jooq:
+    sql-dialect: mysql

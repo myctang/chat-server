@@ -32,7 +32,8 @@ jooq {
                 logging = Logging.WARN
                 jdbc.apply {
                     driver = "com.mysql.jdbc.Driver"
-                    url = "jdbc:mysql://localhost:3306/jooq?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+                    url =
+                        "jdbc:mysql://localhost:3306/jooq?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Moscow&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
                     user = "jooq"
                     password = "Jooq_Password123"
                 }
@@ -75,6 +76,7 @@ jooq {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jooq")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.security:spring-security-crypto:6.2.2")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
     jooqGenerator("com.mysql:mysql-connector-j")
