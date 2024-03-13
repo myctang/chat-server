@@ -2,19 +2,19 @@ package com.myctang.chatserver.controllers;
 
 import com.myctang.chatserver.controllers.requests.DeleteMessageRequest;
 import com.myctang.chatserver.controllers.requests.SendMessageRequest;
-import com.myctang.chatserver.controllers.responses.DeleteMessageResponse;
-import com.myctang.chatserver.controllers.responses.ErrorResponse;
-import com.myctang.chatserver.controllers.responses.SendMessageResponse;
+import com.myctang.chatserver.controllers.responses.*;
 import com.myctang.chatserver.models.AccessToken;
 import com.myctang.chatserver.models.Message;
 import com.myctang.chatserver.models.User;
 import com.myctang.chatserver.services.AccessTokenService;
 import com.myctang.chatserver.services.MessageService;
+import com.myctang.chatserver.services.MessageUpdatesProvider;
 import com.myctang.chatserver.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,8 +32,9 @@ public class MessageControllerTest {
     private final AccessTokenService accessTokenService = mock(AccessTokenService.class);
     private final UserService userService = mock(UserService.class);
     private final MessageService messageService = mock(MessageService.class);
+    private final MessageUpdatesProvider messageUpdatesProvider = mock(MessageUpdatesProvider.class);
     private final MessageController messageController = new MessageController(accessTokenService, userService,
-            messageService);
+            messageService, messageUpdatesProvider);
 
     @Test
     public void should_send_message() {
@@ -155,6 +156,29 @@ public class MessageControllerTest {
         assertThat(response.getMessage(), is("Wrong message state"));
     }
 
+    @Test
+    public void should_return_events() {
+        // given
+        var token = randomUUID().toString();
+        var chatId = randomUUID();
+        var updates = List.of(
+                anUpdate(MessageUpdate.UpdateType.CREATED),
+                anUpdate(MessageUpdate.UpdateType.CREATED),
+                anUpdate(MessageUpdate.UpdateType.DELETED)
+        );
+        var from = LocalDateTime.now();
+        when(messageUpdatesProvider.getUpdatesFrom(chatId, from)).thenReturn(updates);
+
+        // when
+        var result = messageController.getUpdates(token, chatId, from);
+
+        // then
+        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+        assertThat(result.getBody() instanceof GetUpdatedResponse, is(true));
+        var response = (GetUpdatedResponse) result.getBody();
+        assertThat(response.getUpdates(), is(updates));
+    }
+
     private User givenUser(String token) {
         var userId = randomUUID();
         var accessToken = AccessToken.builder()
@@ -196,5 +220,14 @@ public class MessageControllerTest {
                 .build();
         when(messageService.findBy(message.getId())).thenReturn(Optional.of(message));
         return message;
+    }
+
+    private MessageUpdate anUpdate(MessageUpdate.UpdateType updateType) {
+        return MessageUpdate.builder()
+                .type(updateType)
+                .text(randomUUID().toString())
+                .messageId(randomUUID())
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 }

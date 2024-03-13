@@ -4,13 +4,16 @@ import com.myctang.chatserver.controllers.requests.DeleteMessageRequest;
 import com.myctang.chatserver.controllers.requests.SendMessageRequest;
 import com.myctang.chatserver.controllers.responses.DeleteMessageResponse;
 import com.myctang.chatserver.controllers.responses.ErrorResponse;
+import com.myctang.chatserver.controllers.responses.GetUpdatedResponse;
 import com.myctang.chatserver.controllers.responses.SendMessageResponse;
 import com.myctang.chatserver.models.Message;
 import com.myctang.chatserver.models.MessageEvent;
 import com.myctang.chatserver.models.User;
 import com.myctang.chatserver.services.AccessTokenService;
 import com.myctang.chatserver.services.MessageService;
+import com.myctang.chatserver.services.MessageUpdatesProvider;
 import com.myctang.chatserver.services.UserService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -26,7 +29,7 @@ import static com.myctang.chatserver.models.MessageEvent.Type.MESSAGE_DELETED;
 import static java.util.UUID.randomUUID;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api/chat/{chatId}")
 @RequiredArgsConstructor
 public class MessageController {
     private static final String MESSAGE_NOT_FOUND = "Message not found";
@@ -35,8 +38,9 @@ public class MessageController {
     private final AccessTokenService accessTokenService;
     private final UserService userService;
     private final MessageService messageService;
+    private final MessageUpdatesProvider messageUpdatesProvider;
 
-    @PostMapping("/{chatId}/send")
+    @PostMapping("/send")
     public ResponseEntity<?> sendMessage(@RequestHeader("Authorization") String authorization,
                                          @PathVariable("chatId") UUID chatId,
                                          @RequestBody SendMessageRequest request) {
@@ -64,7 +68,7 @@ public class MessageController {
                 .build());
     }
 
-    @PostMapping("/{chatId}/delete")
+    @PostMapping("/delete")
     public ResponseEntity<?> deleteMessage(@RequestHeader("Authorization") String authentication,
                                            @PathVariable("chatId") UUID chatId,
                                            @RequestBody DeleteMessageRequest request) {
@@ -93,6 +97,16 @@ public class MessageController {
         messageService.updateMessageState(message.get().getId(), DELETED, event);
         return ResponseEntity.ok(DeleteMessageResponse.builder()
                 .messageId(message.get().getId())
+                .build());
+    }
+
+    @GetMapping("/updates")
+    public ResponseEntity<?> getUpdates(@RequestHeader("Authorization") String authentication,
+                                        @PathVariable("chatId") UUID chatId,
+                                        @PathParam("from") LocalDateTime from) {
+        var messageUpdates = messageUpdatesProvider.getUpdatesFrom(chatId, from);
+        return ResponseEntity.ok(GetUpdatedResponse.builder()
+                .updates(messageUpdates)
                 .build());
     }
 

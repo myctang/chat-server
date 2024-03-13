@@ -9,7 +9,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.chat.server.Tables.MESSAGES;
@@ -70,5 +72,20 @@ public class MessageRepository {
                 .from(MESSAGES)
                 .where(MESSAGES.ID.eq(id.toString()))
                 .fetchOptional(RECORD_MAPPER);
+    }
+
+    @NonNull
+    public List<Message> findBy(@NonNull Set<UUID> id) {
+        requireNonNull(id, "id");
+        return dslContext.select(MESSAGES.ID,
+                        MESSAGES.STATE,
+                        MESSAGES.SENDER,
+                        MESSAGES.CHAT_ID,
+                        MESSAGES.TEXT,
+                        MESSAGES.CREATED_AT,
+                        MESSAGES.UPDATED_AT)
+                .from(MESSAGES)
+                .where(MESSAGES.ID.in(id))
+                .fetch(RECORD_MAPPER);
     }
 }

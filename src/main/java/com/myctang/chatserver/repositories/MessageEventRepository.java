@@ -8,6 +8,8 @@ import org.jooq.RecordMapper;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static com.chat.server.Tables.MESSAGE_EVENTS;
@@ -37,5 +39,22 @@ public class MessageEventRepository {
                 .set(MESSAGE_EVENTS.CREATED_AT, messageEvent.getCreatedAt())
                 .set(MESSAGE_EVENTS.UPDATED_AT, messageEvent.getUpdatedAt())
                 .execute();
+    }
+
+    @NonNull
+    public List<MessageEvent> findEventsFrom(@NonNull UUID chatId,
+                                             @NonNull LocalDateTime from) {
+        requireNonNull(chatId, "chatId");
+        requireNonNull(from, "from");
+        return dslContext.select(MESSAGE_EVENTS.ID,
+                        MESSAGE_EVENTS.CHAT_ID,
+                        MESSAGE_EVENTS.MESSAGE_ID,
+                        MESSAGE_EVENTS.EVENT_TYPE,
+                        MESSAGE_EVENTS.CREATED_AT,
+                        MESSAGE_EVENTS.UPDATED_AT)
+                .from(MESSAGE_EVENTS)
+                .where(MESSAGE_EVENTS.CHAT_ID.eq(chatId.toString())
+                        .and(MESSAGE_EVENTS.CREATED_AT.gt(from)))
+                .fetch(RECORD_MAPPER);
     }
 }
