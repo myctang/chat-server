@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
@@ -26,15 +27,19 @@ public class UserService {
 
     @NonNull
     public Optional<String> findPasswordHashBy(@NonNull String username) {
-
         requireNonNull(username, "username");
         return userRepository.findPasswordHashBy(username);
     }
 
     @NonNull
     public Optional<User> findBy(@NonNull String username) {
-
         requireNonNull(username, "username");
         return userRepository.findBy(username);
+    }
+
+    @NonNull
+    public Optional<User> findBy(@NonNull UUID id) {
+        requireNonNull(id, "id");
+        return userRepository.findBy(id);
     }
 }

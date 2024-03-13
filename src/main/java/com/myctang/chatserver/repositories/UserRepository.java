@@ -56,4 +56,12 @@ public class UserRepository {
                 .where(USER.USERNAME.eq(username))
                 .fetchOptional(RECORD_MAPPER);
     }
+
+    public Optional<User> findBy(@NonNull UUID id) {
+        requireNonNull(id, "id");
+        return dslContext.select(USER.ID, USER.STATE, USER.USERNAME, USER.CREATED_AT, USER.UPDATED_AT)
+                .from(USER)
+                .where(USER.ID.eq(id.toString()))
+                .fetchOptional(RECORD_MAPPER);
+    }
 }

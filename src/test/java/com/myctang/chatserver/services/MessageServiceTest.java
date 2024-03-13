@@ -1,5 +1,5 @@
 package com.myctang.chatserver.services;
 
-public class UserServiceTest {
+public class MessageServiceTest {
     //TODO: functional tests for all the methods
 }
