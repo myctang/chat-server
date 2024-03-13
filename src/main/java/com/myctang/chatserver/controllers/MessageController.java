@@ -13,8 +13,8 @@ import com.myctang.chatserver.services.AccessTokenService;
 import com.myctang.chatserver.services.MessageService;
 import com.myctang.chatserver.services.MessageUpdatesProvider;
 import com.myctang.chatserver.services.UserService;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
@@ -103,7 +103,7 @@ public class MessageController {
     @GetMapping("/updates")
     public ResponseEntity<?> getUpdates(@RequestHeader("Authorization") String authentication,
                                         @PathVariable("chatId") UUID chatId,
-                                        @PathParam("from") LocalDateTime from) {
+                                        @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from) {
         var messageUpdates = messageUpdatesProvider.getUpdatesFrom(chatId, from);
         return ResponseEntity.ok(GetUpdatedResponse.builder()
                 .updates(messageUpdates)
